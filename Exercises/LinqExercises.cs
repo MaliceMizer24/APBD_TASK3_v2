@@ -315,7 +315,13 @@ public sealed class LinqExercises
     /// </summary>
     public IEnumerable<string> Challenge01_StudentsWithMoreThanOneActiveCourse()
     {
-        throw NotImplemented(nameof(Challenge01_StudentsWithMoreThanOneActiveCourse));
+        return UniversityData.Students
+            .GroupJoin(UniversityData.Enrollments.Where(e => e.IsActive),
+                s => s.Id,
+                e => e.StudentId,
+                (s, enrollments) => new { s.FirstName, s.LastName, Count = enrollments.Count() })
+            .Where(x => x.Count > 1)
+            .Select(x => $"{x.FirstName} {x.LastName} {x.Count}").ToList();
     }
 
     /// <summary>
@@ -366,11 +372,19 @@ public sealed class LinqExercises
     /// GROUP BY s.City
     /// ORDER BY COUNT(*) DESC;
     /// </summary>
+
     public IEnumerable<string> Challenge04_CitiesAndActiveEnrollmentCounts()
     {
-        throw NotImplemented(nameof(Challenge04_CitiesAndActiveEnrollmentCounts));
+        return UniversityData.Students
+            .GroupJoin(UniversityData.Enrollments.Where(e => e.IsActive),
+                s => s.Id,
+                e => e.StudentId,
+                (s, enrollments) => new { s.City, Count = enrollments.Count() })
+            .GroupBy(x => x.City)
+            .Select(g => new { g.Key, Count = g.Sum(x => x.Count) })
+            .OrderByDescending(x => x.Count)
+            .Select(x => $"{x.Key} {x.Count}").ToList();
     }
-
     private static NotImplementedException NotImplemented(string methodName)
     {
         return new NotImplementedException(
