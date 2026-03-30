@@ -31,9 +31,7 @@ public sealed class LinqExercises
     /// </summary>
     public IEnumerable<string> Task02_StudentEmailAddresses()
     {
-        return UniversityData.Students
-            .Select(s => s.Email)
-            .ToList();
+        return UniversityData.Students.Select(s => s.Email).ToList();
     }
 
 
@@ -157,9 +155,14 @@ public sealed class LinqExercises
     /// ORDER BY Title
     /// OFFSET 2 ROWS FETCH NEXT 2 ROWS ONLY;
     /// </summary>
+
     public IEnumerable<string> Task10_SecondPageOfCourses()
     {
-        throw NotImplemented(nameof(Task10_SecondPageOfCourses));
+        return UniversityData.Courses
+            .OrderBy(c => c.Title)
+            .Skip(2)
+            .Take(2)
+            .Select(c => $"{c.Title} {c.Category}").ToList();
     }
 
     /// <summary>
@@ -194,7 +197,15 @@ public sealed class LinqExercises
     /// </summary>
     public IEnumerable<string> Task12_StudentCoursePairs()
     {
-        throw NotImplemented(nameof(Task12_StudentCoursePairs));
+        return UniversityData.Enrollments
+            .Join(UniversityData.Students,
+                e => e.StudentId,
+                s => s.Id,
+                (e, s) => new { e, s })
+            .Join(UniversityData.Courses,
+                se => se.e.CourseId,
+                c => c.Id,
+                (se, c) => $"{se.s.FirstName} {se.s.LastName} {c.Title}").ToList();
     }
 
     /// <summary>
@@ -207,9 +218,16 @@ public sealed class LinqExercises
     /// JOIN Courses c ON c.Id = e.CourseId
     /// GROUP BY c.Title;
     /// </summary>
+ 
     public IEnumerable<string> Task13_GroupEnrollmentsByCourse()
     {
-        throw NotImplemented(nameof(Task13_GroupEnrollmentsByCourse));
+        return UniversityData.Enrollments
+            .GroupBy(e => e.CourseId)
+            .Join(UniversityData.Courses,
+                g => g.Key,
+                c => c.Id,
+                (g, c) => $"{c.Title} {g.Count()}")
+            .ToList();
     }
 
     /// <summary>
@@ -224,9 +242,17 @@ public sealed class LinqExercises
     /// WHERE e.FinalGrade IS NOT NULL
     /// GROUP BY c.Title;
     /// </summary>
+
     public IEnumerable<string> Task14_AverageGradePerCourse()
     {
-        throw NotImplemented(nameof(Task14_AverageGradePerCourse));
+        return UniversityData.Enrollments
+            .Where(e => e.FinalGrade.HasValue)
+            .GroupBy(e => e.CourseId)
+            .Join(UniversityData.Courses,
+                g => g.Key,
+                c => c.Id,
+                (g, c) => $"{c.Title} {g.Average(e => e.FinalGrade.Value):F2}")
+            .ToList();
     }
 
     /// <summary>
